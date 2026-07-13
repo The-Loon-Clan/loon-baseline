@@ -1,0 +1,39 @@
+{{if .Msg}}<div class="alert alert-success py-1 px-2 mb-3">{{.Msg}}</div>{{end}}
+{{if .Err}}<div class="alert alert-danger py-1 px-2 mb-3">{{.Err}}</div>{{end}}
+<div class="row g-3">
+  <div class="col-md-5">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Profile</h5>
+        <dl class="row mb-0 small">
+          <dt class="col-4 text-muted">Username</dt><dd class="col-8">{{.User.Username}}</dd>
+          <dt class="col-4 text-muted">Email</dt><dd class="col-8">{{if .User.Email}}{{.User.Email}}{{else}}<span class="text-muted">not set</span>{{end}}</dd>
+          <dt class="col-4 text-muted">Role</dt><dd class="col-8">{{.RoleName}}</dd>
+          <dt class="col-4 text-muted">Joined</dt><dd class="col-8">{{.Joined}}</dd>
+        </dl>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-7">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Change password</h5>
+        <form method="post" action="/p/account/change-password">
+          <div class="mb-2">
+            <label class="form-label small mb-1">Current password</label>
+            <input type="password" name="current_password" class="form-control form-control-sm" required autocomplete="current-password">
+          </div>
+          <div class="mb-2">
+            <label class="form-label small mb-1">New password</label>
+            <input type="password" name="new_password" class="form-control form-control-sm" required autocomplete="new-password" minlength="8">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small mb-1">Confirm new password</label>
+            <input type="password" name="confirm_password" class="form-control form-control-sm" required autocomplete="new-password" minlength="8">
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm">Update password</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
