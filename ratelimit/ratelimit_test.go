@@ -31,7 +31,7 @@ func TestPerMinuteLimit(t *testing.T) {
 	r := newEngine(ratelimit.Config{
 		Counter: rlmemory.New(),
 		Key:     func(c *gin.Context) string { return c.Query("apikey") },
-		Rules:   []ratelimit.Rule{{Name: "minute", Window: time.Minute, Limit: func() int { return limit }}},
+		Rules:   []ratelimit.Rule{{Name: "minute", Window: time.Minute, Limit: func(*gin.Context) int { return limit }}},
 	})
 
 	// First `limit` requests pass, then the next is rejected.
@@ -58,7 +58,7 @@ func TestDisabledRulePassesThrough(t *testing.T) {
 	r := newEngine(ratelimit.Config{
 		Counter: rlmemory.New(),
 		Key:     func(c *gin.Context) string { return c.Query("apikey") },
-		Rules:   []ratelimit.Rule{{Name: "minute", Window: time.Minute, Limit: func() int { return 0 }}}, // 0 = disabled
+		Rules:   []ratelimit.Rule{{Name: "minute", Window: time.Minute, Limit: func(*gin.Context) int { return 0 }}}, // 0 = disabled
 	})
 	for i := 0; i < 50; i++ {
 		if w := get(r, "alice"); w.Code != 200 {
@@ -73,8 +73,8 @@ func TestTightestRuleWins(t *testing.T) {
 		Counter: rlmemory.New(),
 		Key:     func(c *gin.Context) string { return c.Query("apikey") },
 		Rules: []ratelimit.Rule{
-			{Name: "minute", Window: time.Minute, Limit: func() int { return 100 }},
-			{Name: "day", Window: time.Hour, Limit: func() int { return 2 }},
+			{Name: "minute", Window: time.Minute, Limit: func(*gin.Context) int { return 100 }},
+			{Name: "day", Window: time.Hour, Limit: func(*gin.Context) int { return 2 }},
 		},
 	})
 	get(r, "alice")
@@ -85,11 +85,57 @@ func TestTightestRuleWins(t *testing.T) {
 	}
 }
 
+func TestLimitVariesByCaller(t *testing.T) {
+	// The limit is evaluated per request, so it can depend on context an earlier
+	// middleware set — here a "tier" that a privileged caller has raised, and a
+	// staff caller exempted entirely (limit 0 = no cap).
+	gin.SetMode(gin.TestMode)
+	r := gin.New()
+	r.GET("/api", func(c *gin.Context) { c.Set("tier", c.Query("tier")) }, ratelimit.Middleware(ratelimit.Config{
+		Counter: rlmemory.New(),
+		Key:     func(c *gin.Context) string { return c.Query("apikey") },
+		Rules: []ratelimit.Rule{{Name: "minute", Window: time.Minute, Limit: func(c *gin.Context) int {
+			switch c.GetString("tier") {
+			case "staff":
+				return 0 // exempt
+			case "vip":
+				return 5
+			default:
+				return 1
+			}
+		}}},
+	}), func(c *gin.Context) { c.String(200, "ok") })
+
+	hit := func(key, tier string) int {
+		w := httptest.NewRecorder()
+		r.ServeHTTP(w, httptest.NewRequest(http.MethodGet, "/api?apikey="+key+"&tier="+tier, nil))
+		return w.Code
+	}
+
+	// default tier: limit 1 -> 2nd rejected.
+	hit("u1", "")
+	if c := hit("u1", ""); c != 429 {
+		t.Fatalf("default tier 2nd request: code=%d want 429", c)
+	}
+	// vip: limit 5 -> 5 ok.
+	for i := 1; i <= 5; i++ {
+		if c := hit("u2", "vip"); c != 200 {
+			t.Fatalf("vip request %d: code=%d want 200", i, c)
+		}
+	}
+	// staff: limit 0 (exempt) -> never limited.
+	for i := 0; i < 20; i++ {
+		if c := hit("u3", "staff"); c != 200 {
+			t.Fatalf("staff should be exempt, code=%d at %d", c, i)
+		}
+	}
+}
+
 func TestOnLimitCustomResponse(t *testing.T) {
 	r := newEngine(ratelimit.Config{
 		Counter: rlmemory.New(),
 		Key:     func(c *gin.Context) string { return c.Query("apikey") },
-		Rules:   []ratelimit.Rule{{Name: "minute", Window: time.Minute, Limit: func() int { return 1 }}},
+		Rules:   []ratelimit.Rule{{Name: "minute", Window: time.Minute, Limit: func(*gin.Context) int { return 1 }}},
 		OnLimit: func(c *gin.Context, _ time.Duration) {
 			c.Data(429, "application/xml", []byte(`<error code="500" description="Request limit reached"/>`))
 		},

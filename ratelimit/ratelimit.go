@@ -31,12 +31,14 @@ type Counter interface {
 }
 
 // Rule is one windowed limit. Name namespaces the counter key and appears in
-// logs/headers ("minute", "day"). Limit is read per request so an admin change
-// takes effect live; <= 0 disables the rule.
+// logs/headers ("minute", "day"). Limit is evaluated per request — so it can
+// vary by caller (e.g. a higher cap for a privileged rank, or 0 to exempt
+// staff) and pick up an admin change live; <= 0 disables the rule for that
+// request.
 type Rule struct {
 	Name   string
 	Window time.Duration
-	Limit  func() int
+	Limit  func(*gin.Context) int
 }
 
 // Config wires the middleware. Key attributes a request to a caller (API key,
@@ -61,9 +63,9 @@ func Middleware(cfg Config) gin.HandlerFunc {
 		}
 		bestRemaining, bestLimit := -1, 0
 		for _, r := range cfg.Rules {
-			limit := r.Limit()
+			limit := r.Limit(c)
 			if limit <= 0 {
-				continue // rule disabled
+				continue // rule disabled for this request
 			}
 			n, err := cfg.Counter.Incr(c.Request.Context(), "rl:"+r.Name+":"+key, r.Window)
 			if err != nil {
