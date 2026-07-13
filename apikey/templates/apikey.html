@@ -1,0 +1,20 @@
+{{if .Msg}}<div class="alert alert-success py-1 px-2 mb-3">{{.Msg}}</div>{{end}}
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title mb-1">Your API key</h5>
+    <p class="text-muted small mb-3">
+      Use this in Newznab/Torznab clients (Sonarr, Radarr, Prowlarr). Treat it
+      like a password — it grants access to your account's API.
+      {{if .Rotated}}<br>Last regenerated: {{.Rotated}}.{{end}}
+    </p>
+    <div class="input-group input-group-sm mb-3">
+      <input type="text" class="form-control font-monospace" value="{{.Key}}" readonly
+             onclick="this.select()" aria-label="API key">
+    </div>
+    <form method="post" action="/p/api-key/regenerate"
+          onsubmit="return confirm('Regenerate your API key? Existing apps will stop working until you update them.');">
+      <button type="submit" class="btn btn-outline-danger btn-sm">Regenerate key</button>
+      <span class="text-muted small ms-2">Invalidates the current key immediately.</span>
+    </form>
+  </div>
+</div>
