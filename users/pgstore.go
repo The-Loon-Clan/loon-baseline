@@ -19,23 +19,29 @@ var _ Store = (*PGStore)(nil)
 // Migrate creates the reference users table (idempotent). New hosts call this
 // at boot; a host with its own users schema skips it.
 func (s *PGStore) Migrate(ctx context.Context) error {
-	_, err := s.db.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS users (
-	    id            BIGSERIAL PRIMARY KEY,
-	    username      TEXT        NOT NULL UNIQUE,
-	    email         TEXT        NOT NULL DEFAULT '',
-	    password_hash TEXT        NOT NULL DEFAULT '',
-	    role          INT         NOT NULL DEFAULT 0,
-	    created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
-	)`)
+	if _, err := s.db.ExecContext(ctx, `CREATE TABLE IF NOT EXISTS users (
+	    id             BIGSERIAL PRIMARY KEY,
+	    username       TEXT        NOT NULL UNIQUE,
+	    email          TEXT        NOT NULL DEFAULT '',
+	    password_hash  TEXT        NOT NULL DEFAULT '',
+	    role           INT         NOT NULL DEFAULT 0,
+	    email_verified BOOLEAN     NOT NULL DEFAULT false,
+	    created_at     TIMESTAMPTZ NOT NULL DEFAULT now()
+	)`); err != nil {
+		return err
+	}
+	// Backfill the column for a users table created before email verification.
+	_, err := s.db.ExecContext(ctx,
+		`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT false`)
 	return err
 }
 
-const userCols = `id, username, email, password_hash, role, created_at`
+const userCols = `id, username, email, password_hash, role, email_verified, created_at`
 
 func scanUser(row interface{ Scan(...any) error }) (*User, error) {
 	var u User
 	var role int
-	if err := row.Scan(&u.ID, &u.Username, &u.Email, &u.PasswordHash, &role, &u.CreatedAt); err != nil {
+	if err := row.Scan(&u.ID, &u.Username, &u.Email, &u.PasswordHash, &role, &u.EmailVerified, &u.CreatedAt); err != nil {
 		if err == sql.ErrNoRows {
 			return nil, ErrNotFound
 		}
@@ -81,6 +87,11 @@ func (s *PGStore) UpdatePasswordHash(ctx context.Context, id int64, hash string)
 
 func (s *PGStore) SetRole(ctx context.Context, id int64, role core.Role) error {
 	_, err := s.db.ExecContext(ctx, `UPDATE users SET role = $2 WHERE id = $1`, id, int(role))
+	return err
+}
+
+func (s *PGStore) SetEmailVerified(ctx context.Context, id int64, verified bool) error {
+	_, err := s.db.ExecContext(ctx, `UPDATE users SET email_verified = $2 WHERE id = $1`, id, verified)
 	return err
 }
 

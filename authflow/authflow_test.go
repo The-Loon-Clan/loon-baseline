@@ -71,6 +71,12 @@ func (m *memStore) SetRole(_ context.Context, id int64, role core.Role) error {
 	}
 	return nil
 }
+func (m *memStore) SetEmailVerified(_ context.Context, id int64, v bool) error {
+	if u, ok := m.byID[id]; ok {
+		u.EmailVerified = v
+	}
+	return nil
+}
 func (m *memStore) List(_ context.Context, _, _ int) ([]*users.User, int, error) {
 	return nil, len(m.byID), nil
 }

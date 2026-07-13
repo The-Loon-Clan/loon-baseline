@@ -22,12 +22,13 @@ var ErrNotFound = errors.New("users: not found")
 // trimmed plugin-facing projection). It carries the password hash + email the
 // auth flows need; project to core.User at the seam via ToCore.
 type User struct {
-	ID           int64
-	Username     string
-	Email        string
-	PasswordHash string
-	Role         core.Role
-	CreatedAt    time.Time
+	ID            int64
+	Username      string
+	Email         string
+	PasswordHash  string
+	Role          core.Role
+	EmailVerified bool
+	CreatedAt     time.Time
 }
 
 // ToCore projects to the plugin-facing core.User (drops the password hash).
@@ -52,5 +53,7 @@ type Store interface {
 	IDByName(ctx context.Context, username string) (int64, error)
 	UpdatePasswordHash(ctx context.Context, id int64, hash string) error
 	SetRole(ctx context.Context, id int64, role core.Role) error
+	// SetEmailVerified marks (or clears) a user's email-verified flag.
+	SetEmailVerified(ctx context.Context, id int64, verified bool) error
 	List(ctx context.Context, offset, limit int) (users []*User, total int, err error)
 }
