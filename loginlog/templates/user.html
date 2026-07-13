@@ -1,0 +1,24 @@
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title mb-1">Recent sign-ins</h5>
+    <p class="text-muted small mb-3">Sign-in attempts on your account. If you see one you don't recognise, change your password on the <a href="/p/account">account page</a>.</p>
+    <div class="table-responsive">
+      <table class="table table-sm mb-0 align-middle">
+        <thead>
+          <tr><th>When</th><th>IP fingerprint</th><th>Result</th></tr>
+        </thead>
+        <tbody>
+          {{range .Rows}}
+          <tr>
+            <td class="small text-muted">{{.When}}</td>
+            <td class="small"><code>{{if .IPShort}}{{.IPShort}}&hellip;{{else}}&mdash;{{end}}</code></td>
+            <td>{{if .Success}}<span class="badge bg-success">success</span>{{else}}<span class="badge bg-danger">failed</span>{{end}}</td>
+          </tr>
+          {{else}}
+          <tr><td colspan="3" class="text-muted small">No sign-ins recorded yet.</td></tr>
+          {{end}}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

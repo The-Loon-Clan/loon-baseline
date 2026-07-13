@@ -1,0 +1,22 @@
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-sm mb-0 align-middle">
+      <thead>
+        <tr><th>When</th><th>User</th><th>IP (hashed)</th><th>Result</th></tr>
+      </thead>
+      <tbody>
+        {{range .Rows}}
+        <tr>
+          <td class="small text-muted">{{.When}}</td>
+          <td>{{if .User}}{{.User}}{{else}}<span class="text-muted">&mdash;</span>{{end}}{{if .UserID}} <span class="text-muted small">#{{.UserID}}</span>{{end}}</td>
+          <td class="small"><code>{{if .IPShort}}{{.IPShort}}&hellip;{{else}}&mdash;{{end}}</code></td>
+          <td>{{if .Success}}<span class="badge bg-success">success</span>{{else}}<span class="badge bg-danger">failed</span>{{end}}</td>
+        </tr>
+        {{else}}
+        <tr><td colspan="4" class="text-muted small">No login attempts recorded yet.</td></tr>
+        {{end}}
+      </tbody>
+    </table>
+  </div>
+</div>
+<p class="text-muted small mt-2 mb-0">Most recent {{len .Rows}} attempts. IPs are stored hashed, never in the clear.</p>
