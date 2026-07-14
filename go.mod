@@ -10,6 +10,7 @@ require (
 	github.com/ameNZB/loon v0.0.0-00010101000000-000000000000
 	github.com/gin-contrib/sessions v1.0.4
 	github.com/gin-gonic/gin v1.10.1
+	github.com/lib/pq v1.10.9
 	github.com/redis/go-redis/v9 v9.21.0
 	golang.org/x/crypto v0.37.0
 )
