@@ -16,11 +16,14 @@
 package session
 
 import (
+	"fmt"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
+	sessredis "github.com/gin-contrib/sessions/redis"
 	"github.com/gin-gonic/gin"
 )
 
@@ -36,6 +39,16 @@ type Config struct {
 	MaxAge time.Duration
 	// Secure sets the Secure cookie flag (HTTPS-only). Off for plain-HTTP dev.
 	Secure bool
+	// RedisAddr, when set (host:port), stores sessions server-side in Redis —
+	// the cookie carries only a signed opaque id. Sessions then survive a
+	// Secret rotation, are revocable server-side, have no 4KB cookie ceiling,
+	// and are immune to the cookie-store stale-response clobber race (an
+	// anonymous response can no longer overwrite session DATA). Empty = the
+	// original whole-session-in-cookie store. Switching stores logs everyone
+	// out once. Mirrors prod's app.session_store knob.
+	RedisAddr     string
+	RedisPassword string
+	RedisDB       int
 }
 
 func (cfg Config) name() string {
@@ -53,13 +66,21 @@ func (cfg Config) MaxAgeD() time.Duration {
 	return cfg.MaxAge
 }
 
-// Middleware returns the sessions middleware; install it on the engine before
-// any route that logs in or reads the user. Options mirror prod: SameSite Lax
-// (cookie rides top-level GETs from external links so users stay logged in;
-// cross-origin POSTs don't carry it, and a double-submit CSRF token covers the
-// rest — see the prod comment at cmd/main.go:1139).
-func (cfg Config) Middleware() gin.HandlerFunc {
-	store := cookie.NewStore(cfg.Secret)
+// Store builds the configured session store: redis-backed when RedisAddr is
+// set, else the cookie store. The error is a boot-time condition only (redis
+// unreachable / bad address).
+func (cfg Config) Store() (sessions.Store, error) {
+	var store sessions.Store
+	if cfg.RedisAddr != "" {
+		rs, err := sessredis.NewStoreWithDB(10, "tcp", cfg.RedisAddr, "", cfg.RedisPassword,
+			strconv.Itoa(cfg.RedisDB), cfg.Secret)
+		if err != nil {
+			return nil, fmt.Errorf("session: redis store at %s: %w", cfg.RedisAddr, err)
+		}
+		store = rs
+	} else {
+		store = cookie.NewStore(cfg.Secret)
+	}
 	store.Options(sessions.Options{
 		Path:     "/",
 		MaxAge:   int(cfg.MaxAgeD().Seconds()),
@@ -67,6 +88,24 @@ func (cfg Config) Middleware() gin.HandlerFunc {
 		Secure:   cfg.Secure,
 		SameSite: http.SameSiteLaxMode,
 	})
+	return store, nil
+}
+
+// Middleware returns the sessions middleware; install it on the engine before
+// any route that logs in or reads the user. Options mirror prod: SameSite Lax
+// (cookie rides top-level GETs from external links so users stay logged in;
+// cross-origin POSTs don't carry it, and a double-submit CSRF token covers the
+// rest — see the prod comment at cmd/main.go:1139).
+//
+// With RedisAddr set, an unreachable Redis panics here — this runs once at
+// boot wiring time, and a host must not silently serve loginless (prod
+// log.Fatals in the same situation). A host that wants explicit handling
+// calls Store() itself.
+func (cfg Config) Middleware() gin.HandlerFunc {
+	store, err := cfg.Store()
+	if err != nil {
+		panic(err)
+	}
 	return sessions.Sessions(cfg.name(), store)
 }
 
