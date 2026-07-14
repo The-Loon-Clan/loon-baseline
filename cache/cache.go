@@ -19,6 +19,18 @@ type Cache interface {
 	Delete(ctx context.Context, key string) error
 }
 
+// PrefixDeleter is an optional capability a Cache may implement: drop every key
+// under a namespace prefix in one call. Used for coarse invalidation — e.g. a
+// worker clears the "newznab:v1:" search-cache namespace after an ingest so the
+// API tier repopulates from fresh data. Callers type-assert for it:
+//
+//	if pd, ok := c.(cache.PrefixDeleter); ok { _ = pd.DeletePrefix(ctx, "newznab:v1:") }
+//
+// Both bundled impls (cache/memory, cache/redis) provide it.
+type PrefixDeleter interface {
+	DeletePrefix(ctx context.Context, prefix string) error
+}
+
 // GetJSON reads key and JSON-unmarshals it into dst. ok=false on a miss (dst
 // untouched).
 func GetJSON(ctx context.Context, c Cache, key string, dst any) (bool, error) {

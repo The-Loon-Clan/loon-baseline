@@ -6,6 +6,7 @@ package memory
 
 import (
 	"context"
+	"strings"
 	"sync"
 	"time"
 
@@ -26,7 +27,10 @@ type Cache struct {
 // New builds an empty in-memory cache.
 func New() *Cache { return &Cache{m: map[string]entry{}} }
 
-var _ cache.Cache = (*Cache)(nil)
+var (
+	_ cache.Cache         = (*Cache)(nil)
+	_ cache.PrefixDeleter = (*Cache)(nil)
+)
 
 func (c *Cache) Get(_ context.Context, key string) ([]byte, bool, error) {
 	c.mu.Lock()
@@ -60,6 +64,18 @@ func (c *Cache) Set(_ context.Context, key string, val []byte, ttl time.Duration
 func (c *Cache) Delete(_ context.Context, key string) error {
 	c.mu.Lock()
 	delete(c.m, key)
+	c.mu.Unlock()
+	return nil
+}
+
+// DeletePrefix removes every key beginning with prefix.
+func (c *Cache) DeletePrefix(_ context.Context, prefix string) error {
+	c.mu.Lock()
+	for k := range c.m {
+		if strings.HasPrefix(k, prefix) {
+			delete(c.m, k)
+		}
+	}
 	c.mu.Unlock()
 	return nil
 }
