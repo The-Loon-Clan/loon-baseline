@@ -7,14 +7,20 @@ import (
 	"fmt"
 	"strings"
 	"testing"
+
+	"github.com/ameNZB/loon-baseline/cache"
 	"time"
 )
 
-// memCache is a Cache for tests; also lets assertions read what was written.
+// memCache satisfies baseline's cache.Cache and lets assertions read what was
+// written. Kept rather than using cache/memory so tests can inspect the bytes
+// and inject Set failures.
 type memCache struct {
 	m       map[string][]byte
 	setErrs map[string]error
 }
+
+var _ cache.Cache = (*memCache)(nil)
 
 func newMemCache() *memCache {
 	return &memCache{m: map[string][]byte{}, setErrs: map[string]error{}}
@@ -27,7 +33,16 @@ func (c *memCache) Set(_ context.Context, name string, body []byte, _ time.Durat
 	c.m[name] = body
 	return nil
 }
-func (c *memCache) Get(_ context.Context, name string) ([]byte, error) { return c.m[name], nil }
+
+func (c *memCache) Get(_ context.Context, name string) ([]byte, bool, error) {
+	v, ok := c.m[name]
+	return v, ok, nil
+}
+
+func (c *memCache) Delete(_ context.Context, name string) error {
+	delete(c.m, name)
+	return nil
+}
 
 // stubSource yields n synthetic entries, paged.
 type stubSource struct {
@@ -62,12 +77,12 @@ func (s *stubSource) Page(_ context.Context, limit, offset int) ([]Entry, error)
 	return out, nil
 }
 
-func newGen(cache Cache, sources ...Source) *Generator {
+func newGen(c cache.Cache, sources ...Source) *Generator {
 	return New(Config{
 		BaseURL:     "https://example.com",
 		StaticPaths: []string{"/", "/browse"},
 		TTL:         time.Hour,
-	}, cache, sources...)
+	}, c, sources...)
 }
 
 func TestGenerate(t *testing.T) {

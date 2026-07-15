@@ -24,6 +24,8 @@ import (
 	"encoding/xml"
 	"fmt"
 	"time"
+
+	"github.com/ameNZB/loon-baseline/cache"
 )
 
 // URLsPerFile is the sitemaps.org cap on URLs in a single sitemap file. Sources
@@ -58,14 +60,6 @@ type Source interface {
 	Page(ctx context.Context, limit, offset int) ([]Entry, error)
 }
 
-// Cache is where generated files land for serving. The host's Redis, its
-// storage layer, or a map in a test — this package does not care, and
-// deliberately does not own a Redis client.
-type Cache interface {
-	Set(ctx context.Context, name string, body []byte, ttl time.Duration) error
-	Get(ctx context.Context, name string) ([]byte, error)
-}
-
 // Config is the generator's settings.
 type Config struct {
 	// BaseURL is the site root without a trailing slash ("https://example.com").
@@ -81,16 +75,20 @@ type Config struct {
 }
 
 // Generator turns Sources into cached sitemap XML.
+//
+// The cache is baseline's own cache.Cache, so a host binds cache/memory or
+// cache/redis and this package owns no client and no second abstraction for
+// the same job.
 type Generator struct {
 	cfg     Config
-	cache   Cache
+	cache   cache.Cache
 	sources []Source
 }
 
 // New returns a Generator. Sources may be empty — a site with only static
 // pages still gets a valid index.
-func New(cfg Config, cache Cache, sources ...Source) *Generator {
-	return &Generator{cfg: cfg, cache: cache, sources: sources}
+func New(cfg Config, c cache.Cache, sources ...Source) *Generator {
+	return &Generator{cfg: cfg, cache: c, sources: sources}
 }
 
 // Result reports what a run produced, for the caller's job log.
@@ -283,12 +281,19 @@ func (g *Generator) setPageCount(ctx context.Context, kind string, count int) er
 	return g.cache.Set(ctx, kind+":pagecount", []byte(fmt.Sprintf("%d", count)), g.cfg.TTL)
 }
 
+// getPageCount reads back how many files a kind wrote. A miss is 0 pages, not
+// an error: a kind with no rows writes no files and belongs in no index.
 func (g *Generator) getPageCount(ctx context.Context, kind string) (int, error) {
-	body, err := g.cache.Get(ctx, kind+":pagecount")
-	if err != nil || len(body) == 0 {
+	body, ok, err := g.cache.Get(ctx, kind+":pagecount")
+	if err != nil {
 		return 0, err
 	}
+	if !ok || len(body) == 0 {
+		return 0, nil
+	}
 	var n int
-	_, err = fmt.Sscanf(string(body), "%d", &n)
-	return n, err
+	if _, err := fmt.Sscanf(string(body), "%d", &n); err != nil {
+		return 0, fmt.Errorf("page count %q is not a number: %w", body, err)
+	}
+	return n, nil
 }
