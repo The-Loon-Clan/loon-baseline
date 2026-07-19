@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/ameNZB/loon-baseline/cache"
+	"github.com/the-loon-clan/loon-baseline/cache"
 	"time"
 )
 

@@ -22,7 +22,7 @@ package jobsettings
 import (
 	"context"
 
-	"github.com/ameNZB/loon/schedule"
+	"github.com/the-loon-clan/loon/schedule"
 )
 
 // Store persists per-job config overrides. Its method set is identical to

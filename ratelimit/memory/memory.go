@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ameNZB/loon-baseline/ratelimit"
+	"github.com/the-loon-clan/loon-baseline/ratelimit"
 )
 
 type entry struct {

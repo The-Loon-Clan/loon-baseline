@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/ameNZB/loon/schedule"
+	"github.com/the-loon-clan/loon/schedule"
 )
 
 func TestMockDedupAndClaimFIFO(t *testing.T) {

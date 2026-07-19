@@ -21,8 +21,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ameNZB/loon-baseline/password"
-	"github.com/ameNZB/loon-baseline/users"
+	"github.com/the-loon-clan/loon-baseline/password"
+	"github.com/the-loon-clan/loon-baseline/users"
 )
 
 // Purpose scopes a token so a reset token can't be redeemed as a verify token.

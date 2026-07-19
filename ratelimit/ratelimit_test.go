@@ -8,8 +8,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/ameNZB/loon-baseline/ratelimit"
-	rlmemory "github.com/ameNZB/loon-baseline/ratelimit/memory"
+	"github.com/the-loon-clan/loon-baseline/ratelimit"
+	rlmemory "github.com/the-loon-clan/loon-baseline/ratelimit/memory"
 )
 
 func newEngine(cfg ratelimit.Config) *gin.Engine {

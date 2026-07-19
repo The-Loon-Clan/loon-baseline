@@ -12,11 +12,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/ameNZB/loon/core"
+	"github.com/the-loon-clan/loon/core"
 
-	"github.com/ameNZB/loon-baseline/password"
-	"github.com/ameNZB/loon-baseline/session"
-	"github.com/ameNZB/loon-baseline/users"
+	"github.com/the-loon-clan/loon-baseline/password"
+	"github.com/the-loon-clan/loon-baseline/session"
+	"github.com/the-loon-clan/loon-baseline/users"
 )
 
 var (

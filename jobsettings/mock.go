@@ -4,7 +4,7 @@ import (
 	"context"
 	"sync"
 
-	"github.com/ameNZB/loon/schedule"
+	"github.com/the-loon-clan/loon/schedule"
 )
 
 // Mock is a concurrency-safe in-memory Store for tests and no-database hosts.

@@ -4,7 +4,7 @@
 
 <h1 align="center">loon-baseline</h1>
 
-<p align="center">The reusable host baseline for sites built on the <a href="https://github.com/ameNZB/loon">loon</a> plugin framework.</p>
+<p align="center">The reusable host baseline for sites built on the <a href="https://github.com/The-Loon-Clan/loon">loon</a> plugin framework.</p>
 
 ---
 
@@ -52,5 +52,5 @@ admin := engine.Group("/admin", auth.Require(core.RoleAdmin)...)
 rt, _ := core.Boot(ctx, core.Deps{Auth: auth.CoreAuth(), /* … */})
 ```
 
-The [loon demo site](https://github.com/ameNZB/loon-demo-site) is the reference
+The [loon demo site](https://github.com/The-Loon-Clan/loon-demo-site) is the reference
 consumer.

@@ -1,13 +1,13 @@
-module github.com/ameNZB/loon-baseline
+module github.com/the-loon-clan/loon-baseline
 
 go 1.26.4
 
 // loon is a sibling checkout; this replace drops when loon publishes tagged
 // releases.
-replace github.com/ameNZB/loon => ../loon
+replace github.com/the-loon-clan/loon => ../loon
 
 require (
-	github.com/ameNZB/loon v0.0.0-00010101000000-000000000000
+	github.com/the-loon-clan/loon v0.0.0-00010101000000-000000000000
 	github.com/gin-contrib/sessions v1.1.0
 	github.com/gin-gonic/gin v1.12.0
 	github.com/lib/pq v1.10.9

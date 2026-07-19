@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/ameNZB/loon/core"
+	"github.com/the-loon-clan/loon/core"
 )
 
 func TestFanoutDeliversToEverySink(t *testing.T) {

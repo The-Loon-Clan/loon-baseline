@@ -3,7 +3,7 @@ package webauth
 import (
 	"github.com/gin-gonic/gin"
 
-	"github.com/ameNZB/loon/core"
+	"github.com/the-loon-clan/loon/core"
 )
 
 // CoreAuth builds a loon core.AuthService from this Auth, so plugins get the

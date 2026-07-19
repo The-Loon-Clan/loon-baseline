@@ -9,9 +9,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/ameNZB/loon/core"
+	"github.com/the-loon-clan/loon/core"
 
-	"github.com/ameNZB/loon-baseline/session"
+	"github.com/the-loon-clan/loon-baseline/session"
 )
 
 // harness builds a gin engine with the session middleware, a /login stamping

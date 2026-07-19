@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ameNZB/loon-baseline/cache/memory"
+	"github.com/the-loon-clan/loon-baseline/cache/memory"
 )
 
 // The generator must work against baseline's REAL cache impls, not only the

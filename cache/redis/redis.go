@@ -10,7 +10,7 @@ import (
 
 	goredis "github.com/redis/go-redis/v9"
 
-	"github.com/ameNZB/loon-baseline/cache"
+	"github.com/the-loon-clan/loon-baseline/cache"
 )
 
 // Cache wraps a go-redis client as a cache.Cache.

@@ -18,9 +18,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/ameNZB/loon/core"
+	"github.com/the-loon-clan/loon/core"
 
-	"github.com/ameNZB/loon-baseline/session"
+	"github.com/the-loon-clan/loon-baseline/session"
 )
 
 // nowUnix is a var so expiry tests can travel in time.

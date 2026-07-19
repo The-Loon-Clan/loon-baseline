@@ -25,7 +25,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ameNZB/loon-baseline/cache"
+	"github.com/the-loon-clan/loon-baseline/cache"
 )
 
 // URLsPerFile is the sitemaps.org cap on URLs in a single sitemap file. Sources

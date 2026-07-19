@@ -12,7 +12,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/ameNZB/loon/core"
+	"github.com/the-loon-clan/loon/core"
 )
 
 // ErrNotFound is returned by the by-key lookups when no user matches.

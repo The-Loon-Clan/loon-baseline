@@ -5,10 +5,10 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/ameNZB/loon/core"
+	"github.com/the-loon-clan/loon/core"
 
-	"github.com/ameNZB/loon-baseline/password"
-	"github.com/ameNZB/loon-baseline/users"
+	"github.com/the-loon-clan/loon-baseline/password"
+	"github.com/the-loon-clan/loon-baseline/users"
 )
 
 // memStore is an in-memory users.Store for testing the flow without a DB.

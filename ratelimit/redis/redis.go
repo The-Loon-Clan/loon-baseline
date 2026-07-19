@@ -10,7 +10,7 @@ import (
 
 	goredis "github.com/redis/go-redis/v9"
 
-	"github.com/ameNZB/loon-baseline/ratelimit"
+	"github.com/the-loon-clan/loon-baseline/ratelimit"
 )
 
 // incrExpire increments a key and, only on the first increment of a window, arms

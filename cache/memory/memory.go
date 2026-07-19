@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/ameNZB/loon-baseline/cache"
+	"github.com/the-loon-clan/loon-baseline/cache"
 )
 
 type entry struct {

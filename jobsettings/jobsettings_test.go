@@ -4,7 +4,7 @@ import (
 	"context"
 	"testing"
 
-	"github.com/ameNZB/loon/schedule"
+	"github.com/the-loon-clan/loon/schedule"
 )
 
 // The Mock must drive a real JobInfo's config exactly as the PGStore would, so
