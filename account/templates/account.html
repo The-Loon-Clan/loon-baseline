@@ -1,34 +1,48 @@
-{{if .Msg}}<div class="alert alert-success py-1 px-2 mb-3">{{.Msg}}</div>{{end}}
-{{if .Err}}<div class="alert alert-danger py-1 px-2 mb-3">{{.Err}}</div>{{end}}
-<div class="row g-3">
-  <div class="col-md-5">
+{{/* Self-contained layout: this view ships in loon-baseline and can't assume
+     the host has Bootstrap's grid (the demo, for one, uses a minimal theme).
+     Scoped .acct-* classes + a CSS grid keep the label/value rows aligned
+     everywhere; .card/.btn/.form-control are the widely-supported basics. */}}
+<style>
+  .acct-cols{display:flex;gap:1rem;flex-wrap:wrap;align-items:flex-start}
+  .acct-cols>.acct-col{flex:1 1 15rem;min-width:14rem}
+  .acct-cols>.acct-col.wide{flex:2 1 18rem;min-width:16rem}
+  .acct-dl{display:grid;grid-template-columns:auto 1fr;gap:.4rem .9rem;margin:0;font-size:.9rem}
+  .acct-dl dt{opacity:.6;font-weight:400}
+  .acct-dl dd{margin:0}
+  .acct-field{margin-bottom:.6rem}
+  .acct-field label{display:block;font-size:.82rem;opacity:.7;margin-bottom:.2rem}
+</style>
+{{if .Msg}}<div class="alert" style="border-color:var(--success,#3ba55d);color:var(--success,#3ba55d);padding:.4rem .6rem;margin-bottom:1rem">{{.Msg}}</div>{{end}}
+{{if .Err}}<div class="alert" style="border-color:var(--danger,#e5534b);color:var(--danger,#e5534b);padding:.4rem .6rem;margin-bottom:1rem">{{.Err}}</div>{{end}}
+<div class="acct-cols">
+  <div class="acct-col">
     <div class="card">
       <div class="card-body">
-        <h5 class="card-title mb-3">Profile</h5>
-        <dl class="row mb-0 small">
-          <dt class="col-4 text-muted">Username</dt><dd class="col-8">{{.User.Username}}</dd>
-          <dt class="col-4 text-muted">Email</dt><dd class="col-8">{{if .User.Email}}{{.User.Email}}{{else}}<span class="text-muted">not set</span>{{end}}</dd>
-          <dt class="col-4 text-muted">Role</dt><dd class="col-8">{{.RoleName}}</dd>
-          <dt class="col-4 text-muted">Joined</dt><dd class="col-8">{{.Joined}}</dd>
+        <h5 class="card-title" style="margin:0 0 .75rem">Profile</h5>
+        <dl class="acct-dl">
+          <dt>Username</dt><dd>{{.User.Username}}</dd>
+          <dt>Email</dt><dd>{{if .User.Email}}{{.User.Email}}{{else}}<span style="opacity:.6">not set</span>{{end}}</dd>
+          <dt>Role</dt><dd>{{.RoleName}}</dd>
+          <dt>Joined</dt><dd>{{.Joined}}</dd>
         </dl>
       </div>
     </div>
   </div>
-  <div class="col-md-7">
+  <div class="acct-col wide">
     <div class="card">
       <div class="card-body">
-        <h5 class="card-title mb-3">Change password</h5>
+        <h5 class="card-title" style="margin:0 0 .75rem">Change password</h5>
         <form method="post" action="/p/account/change-password">
-          <div class="mb-2">
-            <label class="form-label small mb-1">Current password</label>
+          <div class="acct-field">
+            <label>Current password</label>
             <input type="password" name="current_password" class="form-control form-control-sm" required autocomplete="current-password">
           </div>
-          <div class="mb-2">
-            <label class="form-label small mb-1">New password</label>
+          <div class="acct-field">
+            <label>New password</label>
             <input type="password" name="new_password" class="form-control form-control-sm" required autocomplete="new-password" minlength="8">
           </div>
-          <div class="mb-3">
-            <label class="form-label small mb-1">Confirm new password</label>
+          <div class="acct-field" style="margin-bottom:.9rem">
+            <label>Confirm new password</label>
             <input type="password" name="confirm_password" class="form-control form-control-sm" required autocomplete="new-password" minlength="8">
           </div>
           <button type="submit" class="btn btn-primary btn-sm">Update password</button>
