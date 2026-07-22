@@ -1,7 +1,9 @@
 <div class="card-body">
-  <h6 class="card-title mb-2">Profile</h6>
-  <dl class="row mb-0 small">
-    <dt class="col-5 text-muted">Role</dt><dd class="col-7">{{.Role}}</dd>
-    <dt class="col-5 text-muted">Joined</dt><dd class="col-7">{{.Joined}}</dd>
+  <h6 class="card-title" style="margin:0 0 .5rem">Profile</h6>
+  {{/* Self-contained grid (no Bootstrap dependency): keeps label | value
+       aligned on hosts with a minimal theme. See account/templates. */}}
+  <dl style="display:grid;grid-template-columns:auto 1fr;gap:.3rem .75rem;margin:0;font-size:.85rem">
+    <dt style="opacity:.6;font-weight:400">Role</dt><dd style="margin:0">{{.Role}}</dd>
+    <dt style="opacity:.6;font-weight:400">Joined</dt><dd style="margin:0">{{.Joined}}</dd>
   </dl>
 </div>
