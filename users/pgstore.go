@@ -31,8 +31,29 @@ func (s *PGStore) Migrate(ctx context.Context) error {
 		return err
 	}
 	// Backfill the column for a users table created before email verification.
-	_, err := s.db.ExecContext(ctx,
-		`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT false`)
+	if _, err := s.db.ExecContext(ctx,
+		`ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT false`); err != nil {
+		return err
+	}
+	// user_display is the plugin-facing identity DISPLAY contract (loon's
+	// IDENTITY-FACETS design, phase A): four documented columns plugin SQL
+	// JOINs instead of the users table, so each host maps its own schema
+	// behind them. Here the INT role enum maps to the display names (the
+	// core.Role constants) and avatar is empty until the avatar facet
+	// package lands — at which point only this view changes, no plugin.
+	_, err := s.db.ExecContext(ctx, `CREATE OR REPLACE VIEW user_display AS
+		SELECT id,
+		       username,
+		       CASE role
+		           WHEN -2 THEN 'banned'
+		           WHEN -1 THEN 'disabled'
+		           WHEN  1 THEN 'contributor'
+		           WHEN  2 THEN 'mod'
+		           WHEN  3 THEN 'admin'
+		           ELSE 'user'
+		       END AS role,
+		       ''::text AS avatar_path
+		FROM users`)
 	return err
 }
 
