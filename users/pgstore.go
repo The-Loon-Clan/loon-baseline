@@ -36,11 +36,12 @@ func (s *PGStore) Migrate(ctx context.Context) error {
 		return err
 	}
 	// user_display is the plugin-facing identity DISPLAY contract (loon's
-	// IDENTITY-FACETS design, phase A): four documented columns plugin SQL
+	// IDENTITY-FACETS design, phase A): five documented columns plugin SQL
 	// JOINs instead of the users table, so each host maps its own schema
 	// behind them. Here the INT role enum maps to the display names (the
-	// core.Role constants) and avatar is empty until the avatar facet
-	// package lands — at which point only this view changes, no plugin.
+	// core.Role constants); avatar is empty and reputation zero until the
+	// corresponding facet packages land — at which point only this view
+	// changes, no plugin.
 	_, err := s.db.ExecContext(ctx, `CREATE OR REPLACE VIEW user_display AS
 		SELECT id,
 		       username,
@@ -52,7 +53,8 @@ func (s *PGStore) Migrate(ctx context.Context) error {
 		           WHEN  3 THEN 'admin'
 		           ELSE 'user'
 		       END AS role,
-		       ''::text AS avatar_path
+		       ''::text AS avatar_path,
+		       0::smallint AS reputation_tier
 		FROM users`)
 	return err
 }
