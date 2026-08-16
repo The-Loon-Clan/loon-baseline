@@ -1,5 +1,9 @@
 <div class="card-body">
-  <h6 class="card-title" style="margin:0 0 .5rem">Profile</h6>
+  {{/* h3, not h6. This card sits under an h2 on the profile page, and h6
+       leaves three empty levels — someone navigating by heading hears the jump
+       and cannot tell whether they missed a section. card-title is the SIZE;
+       the level is structure, so the size comes from a class instead. */}}
+  <h3 class="card-title h6" style="margin:0 0 .5rem">Profile</h3>
   {{/* Self-contained grid (no Bootstrap dependency): keeps label | value
        aligned on hosts with a minimal theme. See account/templates. */}}
   <dl style="display:grid;grid-template-columns:auto 1fr;gap:.3rem .75rem;margin:0;font-size:.85rem">
