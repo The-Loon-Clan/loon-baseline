@@ -18,3 +18,33 @@
     </form>
   </div>
 </div>
+
+{{with .Usage}}
+<div class="card mt-3">
+  <div class="card-body">
+    <h5 class="card-title mb-1">API usage</h5>
+    <p class="text-muted small mb-3">
+      Requests per day{{if .Limit}}, against your daily limit of {{.Limit}}{{end}}.
+    </p>
+    {{/* A CSS-only bar chart: the host precomputed every height, so this is
+         markup and nothing else. The track is the quota; a bar that crossed
+         it turns the over colour. */}}
+    <div class="d-flex align-items-end gap-1" style="height:96px" role="img"
+         aria-label="Daily API requests{{if .Limit}}, limit {{.Limit}} per day{{end}}">
+      {{range .Days}}
+      <div class="d-flex flex-column align-items-center" style="flex:1;min-width:0;height:100%">
+        <div class="w-100 d-flex align-items-end" style="flex:1;background:var(--bs-border-color, rgba(128,128,128,.15));border-radius:2px">
+          <div class="w-100" style="height:{{.Pct}}%;border-radius:2px;background:{{if .Over}}var(--bs-danger, #d9534f){{else}}var(--bs-primary, #4a7dcf){{end}}"
+               title="{{.Label}}: {{.Count}} requests"></div>
+        </div>
+        <span class="text-muted" style="font-size:0.6rem;white-space:nowrap;overflow:hidden;max-width:100%">{{.Label}}</span>
+      </div>
+      {{end}}
+    </div>
+    <p class="text-muted small mb-0 mt-2">
+      Today: <strong>{{.Today}}</strong>{{if .Limit}} / {{.Limit}}{{end}}
+      &middot; last 7 days: <strong>{{.Week}}</strong>
+    </p>
+  </div>
+</div>
+{{end}}

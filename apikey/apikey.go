@@ -72,9 +72,42 @@ type Resolver func(ctx context.Context, key string) (userID int64, ok bool, err 
 // CurrentFunc resolves the logged-in user for a request (host middleware).
 type CurrentFunc func(*gin.Context) (*core.User, bool)
 
+// Usage is the key's request accounting, as the page shows it: a daily bar
+// chart against the quota, plus the two figures people actually quote. The
+// HOST computes all of it — it owns the counters and the limit — and this
+// package only draws, so the graph can never promise a number the API then
+// refuses.
+type Usage struct {
+	// Days is the graph, oldest first, every day present (zeros included —
+	// a gap and a quiet day must look different from a missing axis).
+	Days []UsageDay
+	// Limit is the daily quota the bars are drawn against; 0 = unlimited,
+	// which hides the limit line and scales bars to the busiest day.
+	Limit int
+	// Today and Week are the figures under the graph.
+	Today int64
+	Week  int64
+}
+
+// UsageDay is one bar.
+type UsageDay struct {
+	Label string // short day label, e.g. "12 Aug"
+	Count int64
+	// Pct is the bar height, 0–100, computed by the host against Limit (or
+	// the busiest day when unlimited) so the template does no arithmetic.
+	Pct int
+	// Over marks a day that crossed the quota.
+	Over bool
+}
+
+// UsageFunc reports a user's API usage. ok=false hides the panel — a host
+// that does not count requests still gets the key page it always had.
+type UsageFunc func(ctx context.Context, userID int64) (Usage, bool)
+
 type handler struct {
 	store   Store
 	current CurrentFunc
+	usage   UsageFunc
 	tmpl    *template.Template
 }
 
@@ -82,12 +115,14 @@ type handler struct {
 // login-gated site page. Register on the Core after Boot; a view-system host
 // mounts it at /p/api-key (+ the regenerate POST) and lists it in the site nav
 // for signed-in viewers.
-func Views(store Store, current CurrentFunc) ([]core.View, error) {
+// usage may be nil: the page renders without the usage panel, exactly as it
+// did before hosts counted anything.
+func Views(store Store, current CurrentFunc, usage UsageFunc) ([]core.View, error) {
 	t, err := template.ParseFS(viewFS, "templates/*.html")
 	if err != nil {
 		return nil, err
 	}
-	h := &handler{store: store, current: current, tmpl: t}
+	h := &handler{store: store, current: current, usage: usage, tmpl: t}
 	return []core.View{{
 		Slug: "api-key", Title: "API key", Slot: core.SlotSitePage,
 		MinRole: core.RoleUser, // any logged-in account, their own key
@@ -107,10 +142,16 @@ func (h *handler) render(c *gin.Context) (template.HTML, error) {
 	if err != nil {
 		return "", err
 	}
-	return h.view(k, c.Query("msg"))
+	var usage *Usage
+	if h.usage != nil {
+		if us, ok := h.usage(c.Request.Context(), u.ID); ok {
+			usage = &us
+		}
+	}
+	return h.view(k, c.Query("msg"), usage)
 }
 
-func (h *handler) view(k Key, msg string) (template.HTML, error) {
+func (h *handler) view(k Key, msg string, usage *Usage) (template.HTML, error) {
 	rotated := ""
 	if !k.RotatedAt.IsZero() {
 		rotated = k.RotatedAt.Format("2006-01-02 15:04")
@@ -120,6 +161,7 @@ func (h *handler) view(k Key, msg string) (template.HTML, error) {
 		"Key":     k.Key,
 		"Rotated": rotated,
 		"Msg":     msg,
+		"Usage":   usage,
 	}); err != nil {
 		return "", err
 	}
