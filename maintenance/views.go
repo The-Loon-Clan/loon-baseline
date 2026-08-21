@@ -34,6 +34,10 @@ func (c *Controller) renderAdmin(g *gin.Context) (template.HTML, error) {
 		"Active":  s.Active,
 		"Reason":  s.Reason,
 		"ETAMins": s.ETASecs / 60,
+		// Unconditionally, even when empty — a missing field is a 403 the
+		// person clicking cannot diagnose.
+		"CSRFField": core.CSRFFieldName,
+		"CSRFToken": core.CSRFFromRequest(g),
 	}); err != nil {
 		return "", err
 	}
