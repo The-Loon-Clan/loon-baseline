@@ -44,7 +44,9 @@ func (m *memInbox) Add(_ context.Context, uid int64, n core.Notification) error 
 	m.items[uid] = append(m.items[uid], Item{Title: n.Title, Body: n.Body})
 	return nil
 }
-func (m *memInbox) List(_ context.Context, uid int64, _ int) ([]Item, error) { return m.items[uid], nil }
+func (m *memInbox) List(_ context.Context, uid int64, _ int) ([]Item, error) {
+	return m.items[uid], nil
+}
 func (m *memInbox) UnreadCount(_ context.Context, uid int64) (int, error) {
 	n := 0
 	for _, it := range m.items[uid] {

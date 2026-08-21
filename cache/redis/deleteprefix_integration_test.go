@@ -10,12 +10,23 @@ import (
 	goredis "github.com/redis/go-redis/v9"
 )
 
-// Exercises the real SCAN+DEL against a live Redis (skipped unless REDIS_ADDR is
-// set). Covers the batching path with > one SCAN batch of keys.
+// Exercises the real SCAN+DEL against a live Redis. Covers the batching path
+// with more than one SCAN batch of keys.
+//
+// REDIS_TEST_ADDR, NOT REDIS_ADDR, and the difference is not cosmetic. This
+// test calls FlushDB — it wipes the entire database — and REDIS_ADDR is the
+// OPERATOR'S switch, set in every compose file in this project. Gated on that,
+// `go test ./...` on a developer machine with the app's environment loaded
+// would flush whatever Redis the app was using: the running site's cache, its
+// sessions, its rate-limit counters.
+//
+// The sibling test in session/ already read REDIS_TEST_ADDR for exactly this
+// reason, and loon-demo-site's Makefile spells the reason out. This one was the
+// odd case out.
 func TestDeletePrefixAgainstRedis(t *testing.T) {
-	addr := os.Getenv("REDIS_ADDR")
+	addr := os.Getenv("REDIS_TEST_ADDR")
 	if addr == "" {
-		t.Skip("REDIS_ADDR not set; skipping Redis integration test")
+		t.Skip("REDIS_TEST_ADDR not set; skipping Redis integration test")
 	}
 	ctx := context.Background()
 	rdb := goredis.NewClient(&goredis.Options{Addr: addr})

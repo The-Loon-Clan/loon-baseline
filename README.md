@@ -54,3 +54,29 @@ rt, _ := core.Boot(ctx, core.Deps{Auth: auth.CoreAuth(), /* … */})
 
 The [loon demo site](https://github.com/The-Loon-Clan/loon-demo-site) is the reference
 consumer.
+
+## Development
+
+```sh
+make help      # the targets
+make check     # what CI runs: fmt, vet, sqllint, test
+make itest     # the tests that need a real Postgres and Redis, against throwaway ones
+```
+
+The toolchain runs in a container (`scripts/go.sh` says why), and that script
+mounts the PARENT directory: `go.mod` carries `replace
+github.com/the-loon-clan/loon => ../loon`, so keep loon checked out beside this
+repo or the module graph will not resolve.
+
+**Never point the integration tests at a real service.** The Redis test calls
+`FlushDB`; it reads `REDIS_TEST_ADDR` rather than `REDIS_ADDR` for exactly that
+reason, and the Postgres tests create and drop schemas. `make itest` starts
+throwaway ones and removes them afterwards.
+
+[CONTRIBUTING.md](CONTRIBUTING.md) covers the layering rule this module lives
+by — it may depend on `loon` and must not depend on `loon-plugins`.
+[SECURITY.md](SECURITY.md) covers reporting and what the guards here promise.
+
+## License
+
+MIT — see [LICENSE](LICENSE).

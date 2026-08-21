@@ -8,7 +8,10 @@ import (
 
 type fakeStore struct{ recorded []Entry }
 
-func (f *fakeStore) Record(_ context.Context, e Entry) error       { f.recorded = append(f.recorded, e); return nil }
+func (f *fakeStore) Record(_ context.Context, e Entry) error {
+	f.recorded = append(f.recorded, e)
+	return nil
+}
 func (f *fakeStore) Recent(context.Context, int64, int) ([]Entry, error) { return nil, nil }
 func (f *fakeStore) RecentAll(context.Context, int) ([]Entry, error)     { return nil, nil }
 
