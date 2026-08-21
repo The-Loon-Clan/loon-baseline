@@ -72,7 +72,8 @@ var servicesTmpl = template.Must(template.New("services").Parse(`
   <p class="text-muted small mb-3">Process instances seen in the last {{.WindowSecs}}s
     ({{.Total}} online{{range $k, $n := .ByKind}} &middot; {{$n}} {{$k}}{{end}}).</p>
   {{if .Rows}}
-  <div class="table-responsive"><table class="table table-dark table-sm align-middle">
+  <div class="data-table-wrapper"><table class="data-table">
+    <caption class="visually-hidden">Services and when each last reported in</caption>
     <thead><tr><th>Kind</th><th>Instance</th><th class="text-end">Uptime</th><th class="text-end">Last seen</th><th>Meta</th></tr></thead>
     <tbody>
     {{range .Rows}}
