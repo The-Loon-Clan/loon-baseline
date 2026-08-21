@@ -68,7 +68,7 @@ func shortDur(d time.Duration) string {
 
 var servicesTmpl = template.Must(template.New("services").Parse(`
 <div class="card"><div class="card-body">
-  <h5 class="card-title mb-1">Services online</h5>
+  <h2 class="card-title mb-1">Services online</h2>
   <p class="text-muted small mb-3">Process instances seen in the last {{.WindowSecs}}s
     ({{.Total}} online{{range $k, $n := .ByKind}} &middot; {{$n}} {{$k}}{{end}}).</p>
   {{if .Rows}}

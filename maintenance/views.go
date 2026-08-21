@@ -62,7 +62,7 @@ func (c *Controller) endAction(g *gin.Context) (template.HTML, error) {
 
 var adminTmpl = template.Must(template.New("madmin").Parse(`
 <div class="card"><div class="card-body">
-  <h5 class="card-title mb-3">Maintenance mode</h5>
+  <h2 class="card-title mb-3">Maintenance mode</h2>
   {{if .Active}}
     <p><span class="badge bg-warning text-dark">ON</span> The site is showing the maintenance page to visitors.</p>
     {{if .Reason}}<p class="text-muted small mb-3">Reason: {{.Reason}}</p>{{end}}
