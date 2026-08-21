@@ -91,7 +91,6 @@ func (h *handler) render(ctx context.Context, msg, errMsg string, csrf string) (
 		"Users": rows, "Roles": roleOpts, "Total": total, "Msg": msg, "Err": errMsg,
 		// Unconditionally, even when empty — a missing field is a 403 the
 		// person clicking cannot diagnose.
-		"CSRFField": core.CSRFFieldName,
 		"CSRFToken": csrf,
 	}); err != nil {
 		return "", err

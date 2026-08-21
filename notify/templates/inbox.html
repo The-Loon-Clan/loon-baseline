@@ -12,7 +12,7 @@
   {{end}}
 </div>
 <form method="post" action="/p/inbox/read-all">
-          {{if .CSRFField}}<input type="hidden" name="{{.CSRFField}}" value="{{.CSRFToken}}">{{end}}
+          <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
   <button class="btn btn-sm btn-outline-secondary" type="submit">Mark all read</button>
 </form>
 {{else}}

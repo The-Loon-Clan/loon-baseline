@@ -138,7 +138,6 @@ func (h *inboxHandler) render(c *gin.Context) (template.HTML, error) {
 		"Items": items,
 		// Unconditionally, even when empty — a missing field is a 403 the
 		// person clicking cannot diagnose.
-		"CSRFField": core.CSRFFieldName,
 		"CSRFToken": core.CSRFFromRequest(c),
 	}); err != nil {
 		return "", err

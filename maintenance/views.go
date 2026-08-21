@@ -36,7 +36,6 @@ func (c *Controller) renderAdmin(g *gin.Context) (template.HTML, error) {
 		"ETAMins": s.ETASecs / 60,
 		// Unconditionally, even when empty — a missing field is a 403 the
 		// person clicking cannot diagnose.
-		"CSRFField": core.CSRFFieldName,
 		"CSRFToken": core.CSRFFromRequest(g),
 	}); err != nil {
 		return "", err
@@ -68,12 +67,13 @@ var adminTmpl = template.Must(template.New("madmin").Parse(`
     <p><span class="badge bg-warning text-dark">ON</span> The site is showing the maintenance page to visitors.</p>
     {{if .Reason}}<p class="text-muted small mb-3">Reason: {{.Reason}}</p>{{end}}
     <form method="post" action="/admin/p/maintenance/end">
+      <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
       <button class="btn btn-success btn-sm">End maintenance</button>
     </form>
   {{else}}
     <p><span class="badge bg-secondary">OFF</span> The site is serving normally.</p>
     <form method="post" action="/admin/p/maintenance/begin">
-      {{if .CSRFField}}<input type="hidden" name="{{.CSRFField}}" value="{{.CSRFToken}}">{{end}}
+      <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
       <div class="mb-2">
         <label class="form-label small mb-1">Reason (shown on the page)</label>
         <input type="text" name="reason" class="form-control form-control-sm" placeholder="Upgrading the database">

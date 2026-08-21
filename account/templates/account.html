@@ -33,7 +33,7 @@
       <div class="card-body">
         <h5 class="card-title" style="margin:0 0 .75rem">Change password</h5>
         <form method="post" action="/p/account/change-password">
-          {{if .CSRFField}}<input type="hidden" name="{{.CSRFField}}" value="{{.CSRFToken}}">{{end}}
+          <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
           <div class="acct-field">
             <label>Current password</label>
             <input type="password" name="current_password" class="form-control form-control-sm" required autocomplete="current-password">

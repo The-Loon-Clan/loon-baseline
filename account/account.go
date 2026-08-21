@@ -74,7 +74,6 @@ func (h *handler) view(u *core.User, msg, errMsg, csrf string) (template.HTML, e
 		"Msg":      msg,
 		"Err":      errMsg,
 		// Unconditionally, even when empty — see the note in this commit.
-		"CSRFField": core.CSRFFieldName,
 		"CSRFToken": csrf,
 	}); err != nil {
 		return "", err

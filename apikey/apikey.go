@@ -164,7 +164,6 @@ func (h *handler) view(k Key, msg string, usage *Usage, csrf string) (template.H
 		"Usage":   usage,
 		// Unconditionally, even when empty — a missing field is a 403 the
 		// person clicking cannot diagnose.
-		"CSRFField": core.CSRFFieldName,
 		"CSRFToken": csrf,
 	}); err != nil {
 		return "", err
