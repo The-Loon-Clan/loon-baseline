@@ -75,12 +75,12 @@ var adminTmpl = template.Must(template.New("madmin").Parse(`
     <form method="post" action="/admin/p/maintenance/begin">
       <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
       <div class="mb-2">
-        <label class="form-label small mb-1">Reason (shown on the page)</label>
-        <input type="text" name="reason" class="form-control form-control-sm" placeholder="Upgrading the database">
+        <label class="form-label small mb-1" for="mnt-reason">Reason (shown on the page)</label>
+        <input type="text" id="mnt-reason" name="reason" class="form-control form-control-sm" placeholder="Upgrading the database">
       </div>
       <div class="mb-3">
-        <label class="form-label small mb-1">ETA in minutes (0 = unknown)</label>
-        <input type="number" name="eta_mins" class="form-control form-control-sm" value="0" min="0">
+        <label class="form-label small mb-1" for="mnt-eta">ETA in minutes (0 = unknown)</label>
+        <input type="number" id="mnt-eta" name="eta_mins" class="form-control form-control-sm" value="0" min="0">
       </div>
       <button class="btn btn-warning btn-sm">Begin maintenance</button>
     </form>

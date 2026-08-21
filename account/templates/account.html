@@ -35,16 +35,16 @@
         <form method="post" action="/p/account/change-password">
           <input type="hidden" name="_csrf" value="{{.CSRFToken}}">
           <div class="acct-field">
-            <label>Current password</label>
-            <input type="password" name="current_password" class="form-control form-control-sm" required autocomplete="current-password">
+            <label for="acct-current-password">Current password</label>
+            <input type="password" id="acct-current-password" name="current_password" class="form-control form-control-sm" required autocomplete="current-password">
           </div>
           <div class="acct-field">
-            <label>New password</label>
-            <input type="password" name="new_password" class="form-control form-control-sm" required autocomplete="new-password" minlength="8">
+            <label for="acct-new-password">New password</label>
+            <input type="password" id="acct-new-password" name="new_password" class="form-control form-control-sm" required autocomplete="new-password" minlength="8">
           </div>
           <div class="acct-field" style="margin-bottom:.9rem">
-            <label>Confirm new password</label>
-            <input type="password" name="confirm_password" class="form-control form-control-sm" required autocomplete="new-password" minlength="8">
+            <label for="acct-confirm-password">Confirm new password</label>
+            <input type="password" id="acct-confirm-password" name="confirm_password" class="form-control form-control-sm" required autocomplete="new-password" minlength="8">
           </div>
           <button type="submit" class="btn btn-primary btn-sm">Update password</button>
         </form>
