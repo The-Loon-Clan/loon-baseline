@@ -13,6 +13,7 @@
     </div>
     <form method="post" action="/p/api-key/regenerate"
           onsubmit="return confirm('Regenerate your API key?\n\nThe current key stops working immediately. Update the API key in your connected apps (Sonarr, Radarr, Prowlarr) with the new value.');">
+          {{if .CSRFField}}<input type="hidden" name="{{.CSRFField}}" value="{{.CSRFToken}}">{{end}}
       <button type="submit" class="btn btn-outline-danger btn-sm">Regenerate key</button>
       <span class="text-muted small ms-2">Invalidates the current key immediately — update the new key in your connected apps.</span>
     </form>

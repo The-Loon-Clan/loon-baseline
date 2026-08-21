@@ -69,6 +69,7 @@ var adminTmpl = template.Must(template.New("madmin").Parse(`
   {{else}}
     <p><span class="badge bg-secondary">OFF</span> The site is serving normally.</p>
     <form method="post" action="/admin/p/maintenance/begin">
+      {{if .CSRFField}}<input type="hidden" name="{{.CSRFField}}" value="{{.CSRFToken}}">{{end}}
       <div class="mb-2">
         <label class="form-label small mb-1">Reason (shown on the page)</label>
         <input type="text" name="reason" class="form-control form-control-sm" placeholder="Upgrading the database">

@@ -134,7 +134,13 @@ func (h *inboxHandler) render(c *gin.Context) (template.HTML, error) {
 		return "", err
 	}
 	var buf bytes.Buffer
-	if err := h.tmpl.ExecuteTemplate(&buf, "inbox.html", map[string]any{"Items": items}); err != nil {
+	if err := h.tmpl.ExecuteTemplate(&buf, "inbox.html", map[string]any{
+		"Items": items,
+		// Unconditionally, even when empty — a missing field is a 403 the
+		// person clicking cannot diagnose.
+		"CSRFField": core.CSRFFieldName,
+		"CSRFToken": core.CSRFFromRequest(c),
+	}); err != nil {
 		return "", err
 	}
 	return template.HTML(buf.String()), nil

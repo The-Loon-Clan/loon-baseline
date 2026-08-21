@@ -62,10 +62,10 @@ func (h *handler) render(c *gin.Context) (template.HTML, error) {
 	if !ok {
 		return "", nil // the site gate prevents this; render nothing if reached
 	}
-	return h.view(u, c.Query("msg"), c.Query("err"))
+	return h.view(u, c.Query("msg"), c.Query("err"), core.CSRFFromRequest(c))
 }
 
-func (h *handler) view(u *core.User, msg, errMsg string) (template.HTML, error) {
+func (h *handler) view(u *core.User, msg, errMsg, csrf string) (template.HTML, error) {
 	var buf bytes.Buffer
 	if err := h.tmpl.ExecuteTemplate(&buf, "account.html", map[string]any{
 		"User":     u,
@@ -73,6 +73,9 @@ func (h *handler) view(u *core.User, msg, errMsg string) (template.HTML, error) 
 		"Joined":   u.CreatedAt.Format("2006-01-02"),
 		"Msg":      msg,
 		"Err":      errMsg,
+		// Unconditionally, even when empty — see the note in this commit.
+		"CSRFField": core.CSRFFieldName,
+		"CSRFToken": csrf,
 	}); err != nil {
 		return "", err
 	}

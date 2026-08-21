@@ -148,10 +148,10 @@ func (h *handler) render(c *gin.Context) (template.HTML, error) {
 			usage = &us
 		}
 	}
-	return h.view(k, c.Query("msg"), usage)
+	return h.view(k, c.Query("msg"), usage, core.CSRFFromRequest(c))
 }
 
-func (h *handler) view(k Key, msg string, usage *Usage) (template.HTML, error) {
+func (h *handler) view(k Key, msg string, usage *Usage, csrf string) (template.HTML, error) {
 	rotated := ""
 	if !k.RotatedAt.IsZero() {
 		rotated = k.RotatedAt.Format("2006-01-02 15:04")
@@ -162,6 +162,10 @@ func (h *handler) view(k Key, msg string, usage *Usage) (template.HTML, error) {
 		"Rotated": rotated,
 		"Msg":     msg,
 		"Usage":   usage,
+		// Unconditionally, even when empty — a missing field is a 403 the
+		// person clicking cannot diagnose.
+		"CSRFField": core.CSRFFieldName,
+		"CSRFToken": csrf,
 	}); err != nil {
 		return "", err
 	}

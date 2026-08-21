@@ -49,7 +49,7 @@ func Views(store users.Store, hasher password.Hasher) ([]core.View, error) {
 	return []core.View{{
 		Slug: "users", Title: "Users", Slot: core.SlotAdminPage,
 		Render: func(c *gin.Context) (template.HTML, error) {
-			return h.render(c.Request.Context(), c.Query("msg"), c.Query("err"))
+			return h.render(c.Request.Context(), c.Query("msg"), c.Query("err"), core.CSRFFromRequest(c))
 		},
 		Actions: map[string]func(*gin.Context) (template.HTML, error){
 			"set-role":       h.setRole,
@@ -77,7 +77,7 @@ type userRow struct {
 	Joined   string
 }
 
-func (h *handler) render(ctx context.Context, msg, errMsg string) (template.HTML, error) {
+func (h *handler) render(ctx context.Context, msg, errMsg string, csrf string) (template.HTML, error) {
 	list, total, err := h.store.List(ctx, 0, 200)
 	if err != nil {
 		return "", err
@@ -89,6 +89,10 @@ func (h *handler) render(ctx context.Context, msg, errMsg string) (template.HTML
 	var buf bytes.Buffer
 	if err := h.tmpl.ExecuteTemplate(&buf, "users.html", map[string]any{
 		"Users": rows, "Roles": roleOpts, "Total": total, "Msg": msg, "Err": errMsg,
+		// Unconditionally, even when empty — a missing field is a 403 the
+		// person clicking cannot diagnose.
+		"CSRFField": core.CSRFFieldName,
+		"CSRFToken": csrf,
 	}); err != nil {
 		return "", err
 	}
