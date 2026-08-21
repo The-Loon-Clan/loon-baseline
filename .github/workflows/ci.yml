@@ -116,3 +116,57 @@ jobs:
           govulncheck ./...
         env:
           GOWORK: "off"
+
+  # loon-baseline can break the host unilaterally — it supplies authentication,
+  # sessions, the account and admin-users pages — and the host pins it by
+  # pseudo-version, so a break does not surface until somebody bumps that pin.
+  # By then the change is several commits old and the person bumping did not
+  # write it.
+  #
+  # go vet as well as go build: build ignores _test.go, and the host's test
+  # fakes implement interfaces declared here.
+  consumers:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: loon-baseline
+      - uses: actions/checkout@v4
+        with:
+          repository: ameNZB/loon
+          path: loon
+      - uses: actions/checkout@v4
+        with:
+          repository: ameNZB/loon-plugins
+          path: loon-plugins
+      - uses: actions/checkout@v4
+        with:
+          repository: ameNZB/loon-demo-site
+          path: loon-demo-site
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: loon-baseline/go.mod
+
+      # The host pins its siblings by pseudo-version, not by `replace`, so
+      # without this redirect it would compile against the last PUSHED loon-baseline
+      # and say nothing about the commit under test. All three siblings are
+      # redirected, not just this one: a working-tree loon-baseline against pinned
+      # siblings is a combination nobody runs, and a failure there would be
+      # noise rather than signal.
+      - name: Point the host at these working trees
+        working-directory: loon-demo-site
+        run: |
+          go mod edit \
+            -replace github.com/the-loon-clan/loon=../loon \
+            -replace github.com/the-loon-clan/loon-plugins=../loon-plugins \
+            -replace github.com/the-loon-clan/loon-baseline=../loon-baseline
+        env:
+          GOWORK: "off"
+
+      - name: loon-demo-site builds against this commit
+        working-directory: loon-demo-site
+        run: go build ./... && go vet ./...
+        env:
+          GOWORK: "off"
+          GOFLAGS: "-buildvcs=false -mod=mod"
