@@ -3,6 +3,7 @@ package maintenance
 import (
 	"bytes"
 	"html/template"
+	"log"
 )
 
 // The 503 page is fully self-contained (inline CSS, no external assets) so it
@@ -42,9 +43,31 @@ var pageTmpl = template.Must(template.New("maintenance").Funcs(template.FuncMap{
 	},
 }).Parse(pageSrc))
 
+// fallback503 is what a visitor gets if the template itself fails. Plain,
+// and deliberately so: this renders while the site is ALREADY in trouble,
+// and the one thing worse than an unstyled 503 is half of a styled one.
+const fallback503 = `<!doctype html><meta charset="utf-8">` +
+	`<title>Down for maintenance</title>` +
+	`<body style="font:16px system-ui;padding:3rem;text-align:center">` +
+	`<h1>Down for maintenance</h1><p>Back shortly.</p>`
+
 // renderPage renders the 503 body for the given state.
-func renderPage(s State) []byte {
+func renderPage(s State) []byte { return renderWith(pageTmpl, s) }
+
+// renderWith is renderPage with the template as an argument, so the
+// fallback branch can be exercised. Without the seam the only way to test
+// it is to break the real page, and a test that has to break the thing it
+// guards is one nobody runs twice.
+func renderWith(t *template.Template, s State) []byte {
 	var buf bytes.Buffer
-	_ = pageTmpl.Execute(&buf, s)
+	// The error was discarded here, so a template failure returned a
+	// TRUNCATED maintenance page -- the one page guaranteed to be seen by
+	// everybody, rendered while nobody is watching logs for rendering bugs.
+	// Executing into a buffer is what makes recovery possible at all:
+	// nothing has reached the client yet, so there is still a choice.
+	if err := t.Execute(&buf, s); err != nil {
+		log.Printf("maintenance: 503 page failed to render (%v); serving the plain one", err)
+		return []byte(fallback503)
+	}
 	return buf.Bytes()
 }
